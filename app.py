@@ -12,72 +12,72 @@ st.set_page_config(page_title="APLIKASI PROGRAM ATLET", page_icon=":runner:", la
 st.markdown("""
 <style>
     .main {
-        padding: 0.5rem;
-        max-width: 1200px;
+        padding: 0.25rem;
+        max-width: 800px;
         margin: 0 auto;
     }
     @media (max-width: 768px) {
         .main {
-            padding: 0.25rem;
+            padding: 0.15rem;
         }
         .stButton>button {
-            font-size: 0.9em;
-            padding: 0.3rem;
+            font-size: 0.8em;
+            padding: 0.2rem;
         }
         h1 {
-            font-size: 1.5em;
-        }
-        h2 {
             font-size: 1.2em;
         }
+        h2 {
+            font-size: 1em;
+        }
         .calendar-day {
-            font-size: 0.8em;
-            padding: 2px;
-            min-height: 25px;
+            font-size: 0.7em;
+            padding: 1px;
+            min-height: 20px;
         }
         .calendar-day-program {
-            font-size: 0.75em;
-            padding: 2px;
+            font-size: 0.65em;
+            padding: 1px;
         }
         .st-emotion-cache-1r6slb0 {
-            gap: 0.25rem !important;
+            gap: 0.15rem !important;
         }
     }
     .stButton>button {
         width: 100%;
-        margin: 0.5rem 0;
+        margin: 0.3rem 0;
     }
     h1, h2 {
-        margin: 0.75rem 0;
-        font-size: 1.5em;
+        margin: 0.5rem 0;
+        font-size: 1.3em;
     }
     .calendar-day {
-        padding: 3px;
-        margin: 1px;
+        padding: 2px;
+        margin: 0;
         text-align: center;
-        font-size: 0.9em;
-        min-height: 30px;
+        font-size: 0.8em;
+        min-height: 25px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
-        padding: 3px;
-        margin: 1px;
+        padding: 2px;
+        margin: 0;
         text-align: center;
-        border-radius: 3px;
+        border-radius: 2px;
         font-weight: 500;
-        font-size: 0.85em;
+        font-size: 0.75em;
         color: #0066cc;
         display: flex;
         justify-content: center;
         align-items: center;
-        box-shadow: 0 1px 2px rgba(0,102,204,0.15);
+        box-shadow: 0 1px 1px rgba(0,102,204,0.1);
     }
     .calendar-day-program:hover {
         background-color: #d1e9ff;
-        box-shadow: 0 1px 3px rgba(0,102,204,0.2);
+        box-shadow: 0 1px 2px rgba(0,102,204,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
