@@ -39,7 +39,7 @@ st.markdown("""
             text-overflow: ellipsis;
             transform: rotate(0deg);
             writing-mode: horizontal-tb;
-            border: 1px solid #ddd;
+            border: 1px solid #999;
             background-color: #fff;
         }
         .calendar-day-program {
@@ -69,7 +69,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #ddd;
+        border: 1px solid #999;
         background-color: #fff;
     }
     .calendar-day-program {
