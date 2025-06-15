@@ -18,7 +18,7 @@ st.markdown("""
     }
     @media (max-width: 768px) {
         .main {
-            padding: 0.15rem;
+            padding: 0.1rem;
         }
         .stButton>button {
             font-size: 0.8em;
@@ -62,11 +62,11 @@ st.markdown("""
         font-size: 1.3em;
     }
     .calendar-day {
-        padding: 4px;
+        padding: 2px;
         margin: 0;
         text-align: center;
         font-size: 0.8em;
-        min-height: 25px;
+        min-height: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
