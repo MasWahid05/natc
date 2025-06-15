@@ -496,7 +496,8 @@ else:
                         athlete_name = ''
                         for athlete, programs in assigned_programs.items():
                             if date in programs and any(p['name'] == prog['name'] and p['coach'] == prog['coach'] for p in programs[date]):
-                                athlete_name = load_users()[athlete]['name']
+                                users = load_users()
+                                athlete_name = users[athlete]['name'] if athlete in users else 'Tidak diketahui'
                                 break
                         
                         st.write(f"Atlet: {athlete_name if athlete_name else 'Belum ditugaskan'}")
