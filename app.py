@@ -41,7 +41,7 @@ st.markdown("""
             writing-mode: horizontal-tb;
             border: 1px solid #999;
             background-color: transparent;
-            color: #000;
+            color: #fff;
         }
         .calendar-day-program {
             font-size: 0.65em;
@@ -72,7 +72,7 @@ st.markdown("""
         justify-content: center;
         border: 1px solid #999;
         background-color: transparent;
-        color: #000;
+        color: #fff;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
@@ -153,7 +153,7 @@ def create_calendar(year, month, programs_data):
                 if date_str in programs_data:
                     progs = programs_data[date_str]
                     with cols[i]:
-                        st.markdown(f"<div class='calendar-day'>{day}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='calendar-day' style='background-color: #0066cc;'>{day}</div>", unsafe_allow_html=True)
                         for prog in progs:
                             with st.expander(prog['name']):
                                 st.write(f"Deskripsi: {prog['description']}")
