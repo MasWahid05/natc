@@ -84,18 +84,14 @@ def save_user(username, password, role, name, phone):
 # Fungsi untuk membuat kalender
 def create_calendar(year, month, programs_data):
     cal = calendar.monthcalendar(year, month)
-    try:
-        locale.setlocale(locale.LC_ALL, 'id_ID')
-    except locale.Error:
-        locale.setlocale(locale.LC_ALL, 'id_ID.utf8')
-    except:
-        # Fallback jika locale Indonesia tidak tersedia
-        pass
-    month_name = calendar.month_name[month]
+    # Gunakan nama bulan dan hari dalam bahasa Indonesia
+    month_names = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+    day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+    month_name = month_names[month]
     
     # Buat header kalender
     cols = st.columns(7)
-    for i, day in enumerate(['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']):
+    for i, day in enumerate(day_names):
         cols[i].markdown(f"<div class='calendar-day'><b>{day}</b></div>", unsafe_allow_html=True)
     
     # Isi kalender dengan program
@@ -346,7 +342,7 @@ else:
         with col1:
             year = st.selectbox('Tahun', [2025], key='athlete_year')
         with col2:
-            month = st.selectbox('Bulan', range(1, 13), format_func=lambda x: calendar.month_name[x], key='athlete_month')
+            month = st.selectbox('Bulan', range(1, 13), format_func=lambda x: month_names[x], key='athlete_month')
         
         user_programs = assigned_programs.get(st.session_state.username, {})
         create_calendar(year, month, user_programs)
