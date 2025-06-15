@@ -650,40 +650,45 @@ else:
                     'recipient_type': st.session_state.recipient_type
                 }
 
-                # Cek apakah program dengan nama yang sama sudah ada pada tanggal tersebut
+                # Tentukan target atlet
+                if st.session_state.recipient_type == 'Atlet Tertentu':
+                    target_athletes = [st.session_state.selected_athlete]
+                else:
+                    target_athletes = athletes
+
+                # Cek apakah program sudah ada untuk atlet yang dipilih
                 program_exists = False
-                if date_str in programs:
-                    for existing_prog in programs[date_str]:
-                        if existing_prog['name'] == name and existing_prog['coach'] == st.session_state.username:
-                            program_exists = True
-                            break
+                for athlete in target_athletes:
+                    if athlete in assigned_programs and date_str in assigned_programs[athlete]:
+                        for existing_prog in assigned_programs[athlete][date_str]:
+                            if existing_prog['name'] == name and existing_prog['coach'] == st.session_state.username:
+                                program_exists = True
+                                break
+                    if program_exists:
+                        break
                 
                 if program_exists:
-                    st.error('Program dengan nama yang sama sudah ada pada tanggal ini!')
+                    st.error('Program dengan nama yang sama sudah diberikan ke atlet yang dipilih pada tanggal ini!')
                 else:
+                    # Simpan program ke programs.json
                     if date_str not in programs:
                         programs[date_str] = []
+                    program_id = f"{date_str}_{name}_{st.session_state.username}_{datetime.now().strftime('%H%M%S')}"
+                    new_program['id'] = program_id
                     programs[date_str].append(new_program)
-
+                    
                     with open('programs.json', 'w') as f:
                         json.dump(programs, f)
                     
                     # Menugaskan program ke atlet yang dipilih
-                    target_athletes = athletes if st.session_state.recipient_type == 'Semua Atlet' else selected_athletes
-                    
                     for athlete in target_athletes:
                         if athlete not in assigned_programs:
                             assigned_programs[athlete] = {}
                         if date_str not in assigned_programs[athlete]:
                             assigned_programs[athlete][date_str] = []
-                        # Cek apakah program sudah ada untuk atlet ini
-                        prog_exists_for_athlete = False
-                        for existing_prog in assigned_programs[athlete].get(date_str, []):
-                            if existing_prog['name'] == name and existing_prog['coach'] == st.session_state.username:
-                                prog_exists_for_athlete = True
-                                break
-                        if not prog_exists_for_athlete:
-                            assigned_programs[athlete][date_str].append(new_program)
+                        
+                        # Tambahkan program ke atlet
+                        assigned_programs[athlete][date_str].append(new_program)
                 
                 with open('assigned_programs.json', 'w') as f:
                     json.dump(assigned_programs, f)
