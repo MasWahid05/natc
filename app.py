@@ -12,36 +12,45 @@ st.set_page_config(page_title="APLIKASI PROGRAM ATLET", page_icon=":runner:", la
 st.markdown("""
 <style>
     .main {
-        padding: 1rem;
+        padding: 0.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
     }
     .stButton>button {
         width: 100%;
         margin: 0.5rem 0;
     }
     h1, h2 {
-        margin: 1rem 0;
+        margin: 0.75rem 0;
+        font-size: 1.5em;
     }
     .calendar-day {
-        padding: 5px;
-        margin: 2px;
+        padding: 3px;
+        margin: 1px;
         text-align: center;
+        font-size: 0.9em;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
-        padding: 5px;
-        margin: 2px;
+        padding: 3px;
+        margin: 1px;
         text-align: center;
-        border-radius: 5px;
+        border-radius: 3px;
         font-weight: 500;
+        font-size: 0.85em;
         color: #0066cc;
         display: flex;
         justify-content: center;
         align-items: center;
-        box-shadow: 0 1px 3px rgba(0,102,204,0.2);
+        box-shadow: 0 1px 2px rgba(0,102,204,0.15);
     }
     .calendar-day-program:hover {
         background-color: #d1e9ff;
-        box-shadow: 0 2px 5px rgba(0,102,204,0.25);
+        box-shadow: 0 1px 3px rgba(0,102,204,0.2);
     }
 </style>
 """, unsafe_allow_html=True)
