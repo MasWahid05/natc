@@ -16,6 +16,33 @@ st.markdown("""
         max-width: 1200px;
         margin: 0 auto;
     }
+    @media (max-width: 768px) {
+        .main {
+            padding: 0.25rem;
+        }
+        .stButton>button {
+            font-size: 0.9em;
+            padding: 0.3rem;
+        }
+        h1 {
+            font-size: 1.5em;
+        }
+        h2 {
+            font-size: 1.2em;
+        }
+        .calendar-day {
+            font-size: 0.8em;
+            padding: 2px;
+            min-height: 25px;
+        }
+        .calendar-day-program {
+            font-size: 0.75em;
+            padding: 2px;
+        }
+        .st-emotion-cache-1r6slb0 {
+            gap: 0.25rem !important;
+        }
+    }
     .stButton>button {
         width: 100%;
         margin: 0.5rem 0;
