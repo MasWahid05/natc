@@ -568,6 +568,13 @@ else:
         users = load_users()
         athletes = [username for username, data in users.items() if data['role'] == 'athlete']
         
+        # Reset selected athlete if no longer exists
+        if 'selected_athlete' in st.session_state and st.session_state.selected_athlete not in athletes:
+            if athletes:
+                st.session_state.selected_athlete = athletes[0]
+            else:
+                st.session_state.selected_athlete = None
+        
         if 'recipient_type' not in st.session_state:
             st.session_state.recipient_type = 'Semua Atlet'
         if 'selected_athlete' not in st.session_state:
