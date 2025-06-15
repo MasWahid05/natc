@@ -187,6 +187,7 @@ def create_calendar(year, month, programs_data):
                         st.markdown(f"<div class='calendar-day' style='text-align: center; color: #0066cc; font-size: 1.1em; font-weight: bold;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
                         for prog in progs:
                             with st.expander(prog['name']):
+                                st.write(f"Atlet: {prog['athlete']}")
                                 st.write(f"Deskripsi: {prog['description']}")
                                 st.write(f"Durasi: {prog['duration']} jam")
                                 st.write(f"Intensitas: {prog['intensity']}")
@@ -461,6 +462,14 @@ else:
                         st.session_state.edit_mode[edit_key] = False
                     
                     if not st.session_state.edit_mode[edit_key]:
+                        # Cari nama atlet dari assigned_programs
+                        athlete_name = ''
+                        for athlete, programs in assigned_programs.items():
+                            if date in programs and any(p['name'] == prog['name'] and p['coach'] == prog['coach'] for p in programs[date]):
+                                athlete_name = load_users()[athlete]['name']
+                                break
+                        
+                        st.write(f"Atlet: {athlete_name}")
                         st.write(f"Deskripsi: {prog['description']}")
                         st.write(f"Durasi: {prog['duration']} jam")
                         st.write(f"Intensitas: {prog['intensity']}")
