@@ -84,7 +84,13 @@ def save_user(username, password, role, name, phone):
 # Fungsi untuk membuat kalender
 def create_calendar(year, month, programs_data):
     cal = calendar.monthcalendar(year, month)
-    locale.setlocale(locale.LC_ALL, 'id_ID')
+    try:
+        locale.setlocale(locale.LC_ALL, 'id_ID')
+    except locale.Error:
+        locale.setlocale(locale.LC_ALL, 'id_ID.utf8')
+    except:
+        # Fallback jika locale Indonesia tidak tersedia
+        pass
     month_name = calendar.month_name[month]
     
     # Buat header kalender
