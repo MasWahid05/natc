@@ -32,20 +32,24 @@ st.markdown("""
         }
         .calendar-day {
             font-size: 0.7em;
-            padding: 1px;
+            padding: 2px;
             min-height: 20px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             transform: rotate(0deg);
             writing-mode: horizontal-tb;
+            border: 1px solid #ddd;
+            background-color: #fff;
         }
         .calendar-day-program {
             font-size: 0.65em;
-            padding: 1px;
+            padding: 2px;
+            border-radius: 3px;
+            margin: 1px 0;
         }
         .st-emotion-cache-1r6slb0 {
-            gap: 0.15rem !important;
+            gap: 0.1rem !important;
         }
     }
     .stButton>button {
@@ -57,7 +61,7 @@ st.markdown("""
         font-size: 1.3em;
     }
     .calendar-day {
-        padding: 2px;
+        padding: 4px;
         margin: 0;
         text-align: center;
         font-size: 0.8em;
@@ -65,6 +69,8 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: center;
+        border: 1px solid #ddd;
+        background-color: #fff;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
