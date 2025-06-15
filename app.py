@@ -81,12 +81,13 @@ def save_user(username, password, role, name, phone):
 
 
 
+# Nama bulan dan hari dalam bahasa Indonesia
+month_names = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+
 # Fungsi untuk membuat kalender
 def create_calendar(year, month, programs_data):
     cal = calendar.monthcalendar(year, month)
-    # Gunakan nama bulan dan hari dalam bahasa Indonesia
-    month_names = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-    day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     month_name = month_names[month]
     
     # Buat header kalender
