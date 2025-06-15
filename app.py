@@ -571,7 +571,7 @@ else:
             name = st.text_input('Nama Program')
             description = st.text_area('Deskripsi')
             duration = st.number_input('Durasi (jam)', min_value=1, value=1)
-            intensity = st.selectbox('Intensitas', ['Rendah', 'Sedang', 'Tinggi'])
+            intensity = st.selectbox('Intensitas', ['Rendah', 'Sedang', 'Tinggi'], key='intensity_select')
             
             submit = st.form_submit_button('Buat Program')
 
