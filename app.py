@@ -113,6 +113,28 @@ if 'logged_in' not in st.session_state:
     st.session_state.username = None
     st.session_state.role = None
 
+# Fungsi untuk menghapus pengguna
+def delete_user(username):
+    users = load_users()
+    if username in users:
+        del users[username]
+        with open('users.json', 'w') as f:
+            json.dump(users, f)
+        return True
+    return False
+
+# Fungsi untuk mengupdate pengguna
+def update_user(username, new_data):
+    users = load_users()
+    if username in users:
+        if 'password' in new_data and new_data['password']:
+            new_data['password'] = hash_password(new_data['password'])
+        users[username].update(new_data)
+        with open('users.json', 'w') as f:
+            json.dump(users, f)
+        return True
+    return False
+
 # Fungsi untuk menyimpan pengguna baru
 def save_user(username, password, role, name, phone):
     users = load_users()
@@ -228,7 +250,7 @@ if not st.session_state.logged_in:
         new_username = st.text_input('Username', key='reg_username')
         new_password = st.text_input('Password', type='password', key='reg_password')
         confirm_password = st.text_input('Konfirmasi Password', type='password')
-        role = st.selectbox('Role', ['athlete', 'coach'])
+        role = 'athlete' # Registrasi hanya untuk atlet
         name = st.text_input('Nama Lengkap')
         phone = st.text_input('Nomor Telepon')
         
@@ -268,6 +290,140 @@ else:
                 st.success('Profil berhasil diperbarui!')
         
         st.header('Program Latihan')
+    elif st.session_state.role == 'admin':
+        st.title('Dashboard Admin')
+        st.write(f'Selamat datang, {st.session_state.username}!')
+        
+        # Tampilkan dan edit profil admin
+        st.header('Profil Admin')
+        users = load_users()
+        user_data = users[st.session_state.username]
+        
+        with st.expander('Edit Profil'):
+            new_name = st.text_input('Nama Lengkap', value=user_data.get('name', ''))
+            new_phone = st.text_input('Nomor Telepon', value=user_data.get('phone', ''))
+            new_password = st.text_input('Password Baru (kosongkan jika tidak ingin mengubah)', type='password')
+            
+            if st.button('Simpan Perubahan'):
+                users[st.session_state.username]['name'] = new_name
+                users[st.session_state.username]['phone'] = new_phone
+                if new_password:
+                    users[st.session_state.username]['password'] = hash_password(new_password)
+                
+                with open('users.json', 'w') as f:
+                    json.dump(users, f)
+                st.success('Profil berhasil diperbarui!')
+        
+        st.header('Manajemen Pengguna')
+        users = load_users()
+        
+        # Tab untuk menampilkan daftar pelatih dan atlet
+        user_tab1, user_tab2 = st.tabs(['Daftar Pelatih', 'Daftar Atlet'])
+        
+        with user_tab1:
+            coaches = {username: data for username, data in users.items() if data['role'] == 'coach'}
+            st.subheader('Daftar Pelatih')
+            
+            # Tombol untuk menambah pelatih baru
+            if st.button('Tambah Pelatih Baru'):
+                st.session_state.add_coach = True
+                st.rerun()
+            
+            # Form untuk menambah pelatih baru
+            if 'add_coach' in st.session_state and st.session_state.add_coach:
+                with st.form('add_coach_form'):
+                    new_username = st.text_input('Username')
+                    new_password = st.text_input('Password', type='password')
+                    new_name = st.text_input('Nama Lengkap')
+                    new_phone = st.text_input('Nomor Telepon')
+                    
+                    if st.form_submit_button('Simpan'):
+                        if save_user(new_username, new_password, 'coach', new_name, new_phone):
+                            st.success('Pelatih berhasil ditambahkan!')
+                            st.session_state.add_coach = False
+                            st.rerun()
+                        else:
+                            st.error('Username sudah digunakan')
+            
+            # Tampilkan daftar pelatih
+            for username, data in coaches.items():
+                with st.expander(f"Pelatih: {data['name']} ({username})"):
+                    with st.form(f'edit_coach_{username}'):
+                        edit_name = st.text_input('Nama Lengkap', value=data['name'])
+                        edit_phone = st.text_input('Nomor Telepon', value=data['phone'])
+                        edit_password = st.text_input('Password Baru (kosongkan jika tidak ingin mengubah)', type='password')
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.form_submit_button('Simpan Perubahan'):
+                                update_data = {
+                                    'name': edit_name,
+                                    'phone': edit_phone
+                                }
+                                if edit_password:
+                                    update_data['password'] = edit_password
+                                if update_user(username, update_data):
+                                    st.success('Data pelatih berhasil diperbarui!')
+                                    st.rerun()
+                        
+                        with col2:
+                            if st.form_submit_button('Hapus Pelatih'):
+                                if delete_user(username):
+                                    st.success('Pelatih berhasil dihapus!')
+                                    st.rerun()
+        
+        with user_tab2:
+            athletes = {username: data for username, data in users.items() if data['role'] == 'athlete'}
+            st.subheader('Daftar Atlet')
+            
+            # Tombol untuk menambah atlet baru
+            if st.button('Tambah Atlet Baru'):
+                st.session_state.add_athlete = True
+                st.rerun()
+            
+            # Form untuk menambah atlet baru
+            if 'add_athlete' in st.session_state and st.session_state.add_athlete:
+                with st.form('add_athlete_form'):
+                    new_username = st.text_input('Username')
+                    new_password = st.text_input('Password', type='password')
+                    new_name = st.text_input('Nama Lengkap')
+                    new_phone = st.text_input('Nomor Telepon')
+                    
+                    if st.form_submit_button('Simpan'):
+                        if save_user(new_username, new_password, 'athlete', new_name, new_phone):
+                            st.success('Atlet berhasil ditambahkan!')
+                            st.session_state.add_athlete = False
+                            st.rerun()
+                        else:
+                            st.error('Username sudah digunakan')
+            
+            # Tampilkan daftar atlet
+            for username, data in athletes.items():
+                with st.expander(f"Atlet: {data['name']} ({username})"):
+                    with st.form(f'edit_athlete_{username}'):
+                        edit_name = st.text_input('Nama Lengkap', value=data['name'])
+                        edit_phone = st.text_input('Nomor Telepon', value=data['phone'])
+                        edit_password = st.text_input('Password Baru (kosongkan jika tidak ingin mengubah)', type='password')
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.form_submit_button('Simpan Perubahan'):
+                                update_data = {
+                                    'name': edit_name,
+                                    'phone': edit_phone
+                                }
+                                if edit_password:
+                                    update_data['password'] = edit_password
+                                if update_user(username, update_data):
+                                    st.success('Data atlet berhasil diperbarui!')
+                                    st.rerun()
+                        
+                        with col2:
+                            if st.form_submit_button('Hapus Atlet'):
+                                if delete_user(username):
+                                    st.success('Atlet berhasil dihapus!')
+                                    st.rerun()
+    
     elif st.session_state.role == 'athlete':
         st.title('Dashboard Atlet')
         st.write(f'Selamat datang, {st.session_state.username}!')
