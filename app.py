@@ -34,6 +34,11 @@ st.markdown("""
             font-size: 0.7em;
             padding: 1px;
             min-height: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transform: rotate(0deg);
+            writing-mode: horizontal-tb;
         }
         .calendar-day-program {
             font-size: 0.65em;
