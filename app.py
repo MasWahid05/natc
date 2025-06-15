@@ -185,20 +185,35 @@ def create_calendar(year, month, programs_data):
                         """, unsafe_allow_html=True)
                         st.markdown("<div class='has-program'>", unsafe_allow_html=True)
                         st.markdown(f"<div class='calendar-day' style='text-align: center; color: #0066cc; font-size: 1.1em; font-weight: bold;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
-                        for prog in progs:
+                        for idx, prog in enumerate(progs):
                             with st.expander(prog['name']):
-                                st.write(f"Atlet: {prog['athlete']}")
+                                users = load_users()
+                                # Tampilkan nama pelatih
+                                coach_name = users[prog['coach']]['name'] if prog['coach'] in users else 'Tidak diketahui'
+                                st.write(f"Pelatih: {coach_name}")
+                                
+                                # Tampilkan nama atlet
+                                athlete_name = ''
+                                for username, data in users.items():
+                                    if data['role'] == 'athlete' and username in assigned_programs and date_str in assigned_programs[username]:
+                                        for p in assigned_programs[username][date_str]:
+                                            if p['name'] == prog['name'] and p['coach'] == prog['coach']:
+                                                athlete_name = data['name']
+                                                break
+                                st.write(f"Atlet: {athlete_name if athlete_name else 'Belum ditugaskan'}")
+                                
                                 st.write(f"Deskripsi: {prog['description']}")
                                 st.write(f"Durasi: {prog['duration']} jam")
                                 st.write(f"Intensitas: {prog['intensity']}")
-                                st.write(f"Coach: {prog['coach']}")
                                 
                                 # Tambahkan status program dan tombol selesai
                                 program_status = prog.get('status', 'Belum Selesai')
                                 st.write(f"Status: {program_status}")
                                 
                                 if program_status == 'Belum Selesai':
-                                    if st.button('Tandai Selesai', key=f"complete_{date_str}_{prog['name']}_calendar"):
+                                    # Tambahkan username dan indeks ke key untuk membuatnya unik
+                                    button_key = f"complete_{date_str}_{prog['name']}_{st.session_state.username}_{idx}_calendar"
+                                    if st.button('Tandai Selesai', key=button_key):
                                         prog['status'] = 'Menunggu Evaluasi'
                                         with open('assigned_programs.json', 'w') as f:
                                             json.dump(assigned_programs, f)
@@ -469,7 +484,7 @@ else:
                                 athlete_name = load_users()[athlete]['name']
                                 break
                         
-                        st.write(f"Atlet: {athlete_name}")
+                        st.write(f"Atlet: {athlete_name if athlete_name else 'Belum ditugaskan'}")
                         st.write(f"Deskripsi: {prog['description']}")
                         st.write(f"Durasi: {prog['duration']} jam")
                         st.write(f"Intensitas: {prog['intensity']}")
@@ -480,26 +495,34 @@ else:
                                 st.session_state.edit_mode[edit_key] = True
                                 st.rerun()
                         with col2:
+                            # Cek apakah program memiliki atlet
+                            has_athlete = False
+                            for athlete, athlete_programs in assigned_programs.items():
+                                if date in athlete_programs and any(p['name'] == prog['name'] and p['coach'] == prog['coach'] for p in athlete_programs[date]):
+                                    has_athlete = True
+                                    break
+
                             if st.button('Hapus Program', key=f'delete_{edit_key}'):
-                                # Hapus program dari programs.json
-                                programs[date].pop(i)
-                                if not programs[date]:
-                                    del programs[date]
-                                with open('programs.json', 'w') as f:
-                                    json.dump(programs, f)
-                                
-                                # Hapus program dari assigned_programs.json
-                                for athlete in assigned_programs:
-                                    if date in assigned_programs[athlete]:
-                                        if len(assigned_programs[athlete][date]) > i:
-                                            assigned_programs[athlete][date].pop(i)
-                                        if not assigned_programs[athlete][date]:
-                                            del assigned_programs[athlete][date]
-                                with open('assigned_programs.json', 'w') as f:
-                                    json.dump(assigned_programs, f)
-                                
-                                st.success('Program berhasil dihapus!')
-                                st.rerun()
+                                # Hapus program dari programs.json jika tanggal ada
+                                if date in programs:
+                                    programs[date].pop(i)
+                                    if not programs[date]:
+                                        del programs[date]
+                                    with open('programs.json', 'w') as f:
+                                        json.dump(programs, f)
+                                    
+                                    # Hapus program dari assigned_programs.json jika ada
+                                    for athlete, athlete_programs in assigned_programs.items():
+                                        if date in athlete_programs:
+                                            athlete_programs[date] = [p for p in athlete_programs[date] if not (p['name'] == prog['name'] and p['coach'] == prog['coach'])]
+                                            if not athlete_programs[date]:
+                                                del athlete_programs[date]
+                                    
+                                    with open('assigned_programs.json', 'w') as f:
+                                        json.dump(assigned_programs, f)
+                                    
+                                    st.success('Program berhasil dihapus!')
+                                    st.rerun()
                     else:
                         with st.form(f'edit_program_{edit_key}'):
                             new_name = st.text_input('Nama Program', value=prog['name'])
@@ -571,7 +594,7 @@ else:
                     json.dump(programs, f)
                 
                 # Menugaskan program ke atlet yang dipilih
-                target_athletes = athletes if recipient_type == 'Semua Atlet' else selected_athletes
+                target_athletes = athletes if st.session_state.recipient_type == 'Semua Atlet' else selected_athletes
                 
                 for athlete in target_athletes:
                     if athlete not in assigned_programs:
@@ -583,7 +606,7 @@ else:
                 with open('assigned_programs.json', 'w') as f:
                     json.dump(assigned_programs, f)
                 
-                if recipient_type == 'Semua Atlet':
+                if st.session_state.recipient_type == 'Semua Atlet':
                     st.success('Program berhasil dibuat dan dikirim ke semua atlet!')
                 else:
                     st.success(f'Program berhasil dibuat dan dikirim ke {len(selected_athletes)} atlet!')
@@ -608,30 +631,41 @@ else:
             assigned_programs = json.load(f)
             
         st.header('Program Yang Perlu Dievaluasi')
+        has_programs_to_evaluate = False
         for athlete, programs in assigned_programs.items():
             for date_str, programs_list in programs.items():
-                for program in programs_list:
+                for idx, program in enumerate(programs_list):
                     if program.get('coach') == st.session_state.username and program.get('status') == 'Menunggu Evaluasi':
+                        has_programs_to_evaluate = True
                         with st.expander(f"{program['name']} - {date_str} - Atlet: {athlete}"):
                             st.write(f"Deskripsi: {program['description']}")
                             st.write(f"Durasi: {program['duration']} jam")
                             st.write(f"Intensitas: {program['intensity']}")
                             
-                            evaluation = st.text_area('Evaluasi', key=f"eval_{date_str}_{program['name']}_{athlete}")
-                            if st.button('Kirim Evaluasi', key=f"send_eval_{date_str}_{program['name']}_{athlete}"):
+                            evaluation = st.text_area('Evaluasi', key=f"eval_{date_str}_{program['name']}_{athlete}_{idx}")
+                            if st.button('Kirim Evaluasi', key=f"send_eval_{date_str}_{program['name']}_{athlete}_{idx}"):
                                 program['evaluation'] = evaluation
                                 program['status'] = 'Selesai'
                                 with open('assigned_programs.json', 'w') as f:
                                     json.dump(assigned_programs, f)
                                 st.success('Evaluasi berhasil dikirim!')
                                 st.rerun()
+        
+        if not has_programs_to_evaluate:
+            st.info('Tidak ada program yang perlu dievaluasi saat ini.')
 
         # Tampilkan daftar program yang ditugaskan
         st.header('Program Yang Ditugaskan')
+        col1, col2 = st.columns(2)
+        with col1:
+            selected_year = st.selectbox('Tahun', [2025], key='coach_year')
+        with col2:
+            selected_month = st.selectbox('Bulan', range(1, 13), format_func=lambda x: month_names[x], key='coach_month')
+            
         user_programs = assigned_programs.get(st.session_state.username, {})
         for date_str, programs_list in user_programs.items():
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            if date.year == year and date.month == month:
+            if date.year == selected_year and date.month == selected_month:
                 for program in programs_list:
                     with st.expander(f"{program['name']} - {date_str}"):
                         st.write(f"Deskripsi: {program['description']}")
