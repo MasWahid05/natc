@@ -182,7 +182,7 @@ def create_calendar(year, month, programs_data):
                     progs = programs_data[date_str]
                     with cols[i]:
                         # Cek apakah program sudah selesai dan dievaluasi
-                        has_completed_program = any('evaluation' in p for p in progs)
+                        has_completed_program = any('evaluation' in prog for prog in progs)
                         program_class = 'has-program program-completed' if has_completed_program else 'has-program'
                         
                         st.markdown(f"""
