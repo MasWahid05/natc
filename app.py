@@ -229,14 +229,25 @@ def create_calendar(year, month, programs_data):
                                 st.write(f"Status: {program_status}")
                                 
                                 if program_status == 'Belum Selesai':
-                                    # Tambahkan username dan indeks ke key untuk membuatnya unik
-                                    button_key = f"complete_{date_str}_{prog['name']}_{st.session_state.username}_{idx}_calendar"
-                                    if st.button('Tandai Selesai', key=button_key):
-                                        prog['status'] = 'Menunggu Evaluasi'
-                                        with open('assigned_programs.json', 'w') as f:
-                                            json.dump(assigned_programs, f)
-                                        st.success('Program ditandai sebagai selesai!')
-                                        st.rerun()
+                                    # Dapatkan tanggal dan waktu sekarang
+                                    current_date = datetime.now().date()
+                                    program_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                    
+                                    # Hanya tampilkan tombol jika tanggal sekarang sama dengan tanggal program
+                                    if current_date == program_date:
+                                        # Tambahkan username dan indeks ke key untuk membuatnya unik
+                                        button_key = f"complete_{date_str}_{prog['name']}_{st.session_state.username}_{idx}_calendar"
+                                        if st.button('Tandai Selesai', key=button_key):
+                                            prog['status'] = 'Menunggu Evaluasi'
+                                            with open('assigned_programs.json', 'w') as f:
+                                                json.dump(assigned_programs, f)
+                                            st.success('Program ditandai sebagai selesai!')
+                                            st.rerun()
+                                    else:
+                                        if current_date < program_date:
+                                            st.info('Program ini belum dapat ditandai selesai karena belum waktunya.')
+                                        else:
+                                            st.warning('Program ini sudah lewat dari jadwal yang ditentukan.')
                                 
                                 # Tampilkan evaluasi jika ada
                                 if 'evaluation' in prog:
@@ -522,20 +533,29 @@ else:
                                     break
 
                             if st.button('Hapus Program', key=f'delete_{edit_key}'):
-                                # Hapus program dari programs.json jika tanggal ada
-                                if date in programs:
-                                    programs[date].pop(i)
-                                    if not programs[date]:
-                                        del programs[date]
-                                    with open('programs.json', 'w') as f:
-                                        json.dump(programs, f)
+                                try:
+                                    # Hapus program dari programs.json
+                                    if date in programs:
+                                        programs[date] = [p for p in programs[date] if not (p['name'] == prog['name'] and p['coach'] == prog['coach'])]
+                                        if not programs[date]:
+                                            del programs[date]
+                                        with open('programs.json', 'w') as f:
+                                            json.dump(programs, f)
                                     
-                                    # Hapus program dari assigned_programs.json jika ada
+                                    # Hapus program dari assigned_programs.json
                                     for athlete, athlete_programs in assigned_programs.items():
                                         if date in athlete_programs:
                                             athlete_programs[date] = [p for p in athlete_programs[date] if not (p['name'] == prog['name'] and p['coach'] == prog['coach'])]
                                             if not athlete_programs[date]:
                                                 del athlete_programs[date]
+                                    
+                                    with open('assigned_programs.json', 'w') as f:
+                                        json.dump(assigned_programs, f)
+                                    
+                                    st.success('Program berhasil dihapus!')
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f'Terjadi kesalahan saat menghapus program: {str(e)}')
                                     
                                     with open('assigned_programs.json', 'w') as f:
                                         json.dump(assigned_programs, f)
@@ -612,22 +632,40 @@ else:
                     'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
 
-                if date_str not in programs:
-                    programs[date_str] = []
-                programs[date_str].append(new_program)
+                # Cek apakah program dengan nama yang sama sudah ada pada tanggal tersebut
+                program_exists = False
+                if date_str in programs:
+                    for existing_prog in programs[date_str]:
+                        if existing_prog['name'] == name and existing_prog['coach'] == st.session_state.username:
+                            program_exists = True
+                            break
+                
+                if program_exists:
+                    st.error('Program dengan nama yang sama sudah ada pada tanggal ini!')
+                else:
+                    if date_str not in programs:
+                        programs[date_str] = []
+                    programs[date_str].append(new_program)
 
-                with open('programs.json', 'w') as f:
-                    json.dump(programs, f)
-                
-                # Menugaskan program ke atlet yang dipilih
-                target_athletes = athletes if st.session_state.recipient_type == 'Semua Atlet' else selected_athletes
-                
-                for athlete in target_athletes:
-                    if athlete not in assigned_programs:
-                        assigned_programs[athlete] = {}
-                    if date_str not in assigned_programs[athlete]:
-                        assigned_programs[athlete][date_str] = []
-                    assigned_programs[athlete][date_str].append(new_program)
+                    with open('programs.json', 'w') as f:
+                        json.dump(programs, f)
+                    
+                    # Menugaskan program ke atlet yang dipilih
+                    target_athletes = athletes if st.session_state.recipient_type == 'Semua Atlet' else selected_athletes
+                    
+                    for athlete in target_athletes:
+                        if athlete not in assigned_programs:
+                            assigned_programs[athlete] = {}
+                        if date_str not in assigned_programs[athlete]:
+                            assigned_programs[athlete][date_str] = []
+                        # Cek apakah program sudah ada untuk atlet ini
+                        prog_exists_for_athlete = False
+                        for existing_prog in assigned_programs[athlete].get(date_str, []):
+                            if existing_prog['name'] == name and existing_prog['coach'] == st.session_state.username:
+                                prog_exists_for_athlete = True
+                                break
+                        if not prog_exists_for_athlete:
+                            assigned_programs[athlete][date_str].append(new_program)
                 
                 with open('assigned_programs.json', 'w') as f:
                     json.dump(assigned_programs, f)
