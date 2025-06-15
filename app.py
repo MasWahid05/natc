@@ -162,7 +162,10 @@ def save_user(username, password, role, name, phone):
 
 # Nama bulan dan hari dalam bahasa Indonesia
 month_names = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+day_names = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+
+# Set calendar to start on Monday
+calendar.setfirstweekday(calendar.MONDAY)
 
 # Fungsi untuk membuat kalender
 def create_calendar(year, month, programs_data):
@@ -640,7 +643,8 @@ else:
         st.header('Kalender Program Latihan')
         col1, col2 = st.columns(2)
         with col1:
-            year = st.selectbox('Tahun', [2025], key='athlete_year')
+            current_year = datetime.now().year
+            year = st.selectbox('Tahun', range(current_year, current_year + 5), key='athlete_year')
         with col2:
             month = st.selectbox('Bulan', range(1, 13), format_func=lambda x: month_names[x], key='athlete_month')
         
