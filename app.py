@@ -40,7 +40,8 @@ st.markdown("""
             transform: rotate(0deg);
             writing-mode: horizontal-tb;
             border: 1px solid #999;
-            background-color: #fff;
+            background-color: transparent;
+            color: #000;
         }
         .calendar-day-program {
             font-size: 0.65em;
@@ -70,7 +71,8 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         border: 1px solid #999;
-        background-color: #fff;
+        background-color: transparent;
+        color: #000;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
