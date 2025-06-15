@@ -41,7 +41,7 @@ st.markdown("""
             writing-mode: horizontal-tb;
             border: 1px solid #999;
             background-color: transparent;
-            color: #fff;
+            color: #333;
         }
         .calendar-day-program {
             font-size: 0.65em;
@@ -71,8 +71,8 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         border: 1px solid #999;
-        background-color: transparent;
-        color: #fff;
+        background-color: #E6F3FF;
+        color: #333;
     }
     .calendar-day-program {
         background-color: #e7f3ff;
@@ -151,7 +151,18 @@ def create_calendar(year, month, programs_data):
                 if date_str in programs_data:
                     progs = programs_data[date_str]
                     with cols[i]:
-                        st.markdown(f"<div class='calendar-day' style='background-color: #0066cc;'>{day}</div>", unsafe_allow_html=True)
+                        st.markdown("""
+                        <style>
+                        [data-testid="column"]:has(div.has-program) {
+                            background-color: #0066cc;
+                            border-radius: 5px;
+                            padding: 5px;
+                            margin: 2px;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+                        st.markdown("<div class='has-program'>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='calendar-day' style='text-align: center; color: #0066cc; font-size: 1.1em; font-weight: bold;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
                         for prog in progs:
                             with st.expander(prog['name']):
                                 st.write(f"Deskripsi: {prog['description']}")
@@ -174,9 +185,13 @@ def create_calendar(year, month, programs_data):
                                 # Tampilkan evaluasi jika ada
                                 if 'evaluation' in prog:
                                     st.write(f"Evaluasi Pelatih: {prog['evaluation']}")
+                        st.markdown("</div>", unsafe_allow_html=True)
 
                 else:
-                    cols[i].markdown(f"<div class='calendar-day'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
+                    with cols[i]:
+                        st.markdown(f"<div class='calendar-day' style='text-align: center; color: #999; background-color: transparent;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
+                        with st.expander("Tidak ada program"):
+                            st.write("Tidak ada program pada tanggal ini.")
 
 # Tampilkan tombol logout di bagian atas jika sudah login
 if st.session_state.logged_in:
