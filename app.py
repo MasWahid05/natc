@@ -139,10 +139,8 @@ def create_calendar(year, month, programs_data):
     cal = calendar.monthcalendar(year, month)
     month_name = month_names[month]
     
-    # Buat header kalender
+    # Buat header kalender dengan kolom kosong
     cols = st.columns(7)
-    for i, day in enumerate(day_names):
-        cols[i].markdown(f"<div class='calendar-day'></div>", unsafe_allow_html=True)
     
     # Isi kalender dengan program
     for week in cal:
@@ -160,7 +158,6 @@ def create_calendar(year, month, programs_data):
                                 st.write(f"Durasi: {prog['duration']} jam")
                                 st.write(f"Intensitas: {prog['intensity']}")
                                 st.write(f"Coach: {prog['coach']}")
-                                st.write(f"Dibuat pada: {prog['created_at']}")
                                 
                                 # Tambahkan status program dan tombol selesai
                                 program_status = prog.get('status', 'Belum Selesai')
@@ -179,7 +176,7 @@ def create_calendar(year, month, programs_data):
                                     st.write(f"Evaluasi Pelatih: {prog['evaluation']}")
 
                 else:
-                    cols[i].markdown(f"<div class='calendar-day'>{day}</div>", unsafe_allow_html=True)
+                    cols[i].markdown(f"<div class='calendar-day'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
 
 # Tampilkan tombol logout di bagian atas jika sudah login
 if st.session_state.logged_in:
@@ -231,8 +228,34 @@ if not st.session_state.logged_in:
                 else:
                     st.error('Username sudah digunakan')
 else:
-    st.title('Evaluasi Program')
-    st.write(f'Selamat datang, {st.session_state.username}!')
+    if st.session_state.role == 'coach':
+        st.title('Dashboard Pelatih')
+        st.write(f'Selamat datang, {st.session_state.username}!')
+        
+        # Tampilkan dan edit profil pelatih
+        st.header('Profil Pelatih')
+        users = load_users()
+        user_data = users[st.session_state.username]
+        
+        with st.expander('Edit Profil'):
+            new_name = st.text_input('Nama Lengkap', value=user_data.get('name', ''))
+            new_phone = st.text_input('Nomor Telepon', value=user_data.get('phone', ''))
+            new_password = st.text_input('Password Baru (kosongkan jika tidak ingin mengubah)', type='password')
+            
+            if st.button('Simpan Perubahan'):
+                users[st.session_state.username]['name'] = new_name
+                users[st.session_state.username]['phone'] = new_phone
+                if new_password:
+                    users[st.session_state.username]['password'] = hash_password(new_password)
+                
+                with open('users.json', 'w') as f:
+                    json.dump(users, f)
+                st.success('Profil berhasil diperbarui!')
+        
+        st.header('Program Latihan')
+    elif st.session_state.role == 'athlete':
+        st.title('Dashboard Atlet')
+        st.write(f'Selamat datang, {st.session_state.username}!')
     
     # Load program data
     def load_programs():
@@ -269,7 +292,8 @@ else:
                     if not st.session_state.edit_mode[edit_key]:
                         st.write(f"Deskripsi: {prog['description']}")
                         st.write(f"Durasi: {prog['duration']} jam")
-                        st.write(f"Dibuat pada: {prog['created_at']}")
+                        st.write(f"Intensitas: {prog['intensity']}")
+                        st.write(f"Coach: {prog['coach']}")
                         col1, col2 = st.columns(2)
                         with col1:
                             if st.button('Edit Program', key=f'edit_{edit_key}'):
