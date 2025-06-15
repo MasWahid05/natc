@@ -211,14 +211,31 @@ def create_calendar(year, month, programs_data):
                                 st.write(f"Pelatih: {coach_name}")
                                 
                                 # Tampilkan nama atlet
-                                athlete_name = ''
+                                assigned_athletes = []
                                 for username, data in users.items():
-                                    if data['role'] == 'athlete' and username in assigned_programs and date_str in assigned_programs[username]:
-                                        for p in assigned_programs[username][date_str]:
-                                            if p['name'] == prog['name'] and p['coach'] == prog['coach']:
-                                                athlete_name = data['name']
-                                                break
-                                st.write(f"Atlet: {athlete_name if athlete_name else 'Belum ditugaskan'}")
+                                    if data['role'] == 'athlete':
+                                        if username in assigned_programs and \
+                                           date_str in assigned_programs[username] and \
+                                           any(p['name'] == prog['name'] and p['coach'] == prog['coach'] \
+                                               for p in assigned_programs[username][date_str]):
+                                            assigned_athletes.append(data['name'])
+                                
+                                # Hitung total atlet yang terdaftar
+                                total_athletes = len([u for u in users.values() if u['role'] == 'athlete'])
+                                
+                                # Tampilkan informasi atlet
+                                if assigned_athletes:
+                                    # Jika jumlah atlet yang ditugaskan sama dengan total atlet atau recipient_type adalah 'Semua Atlet'
+                                    if len(assigned_athletes) == total_athletes or prog.get('recipient_type') == 'Semua Atlet':
+                                        st.write("Atlet: Semua Atlet")
+                                    elif len(assigned_athletes) == 1:
+                                        st.write(f"Atlet: {assigned_athletes[0]}")
+                                    else:
+                                        st.write("Atlet:")
+                                        for name in assigned_athletes:
+                                            st.write(f"- {name}")
+                                else:
+                                    st.write("Atlet: Belum ditugaskan")
                                 
                                 st.write(f"Deskripsi: {prog['description']}")
                                 st.write(f"Durasi: {prog['duration']} jam")
@@ -629,7 +646,8 @@ else:
                     'duration': duration,
                     'intensity': intensity,
                     'coach': st.session_state.username,
-                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'recipient_type': st.session_state.recipient_type
                 }
 
                 # Cek apakah program dengan nama yang sama sudah ada pada tanggal tersebut
@@ -670,10 +688,12 @@ else:
                 with open('assigned_programs.json', 'w') as f:
                     json.dump(assigned_programs, f)
                 
+                # Hitung jumlah atlet yang menerima program
+                athlete_count = len(target_athletes)
                 if st.session_state.recipient_type == 'Semua Atlet':
-                    st.success('Program berhasil dibuat dan dikirim ke semua atlet!')
+                    st.success(f'Program berhasil dibuat dan dikirim ke {athlete_count} atlet yang terdaftar!')
                 else:
-                    st.success(f'Program berhasil dibuat dan dikirim ke {len(selected_athletes)} atlet!')
+                    st.success(f'Program berhasil dibuat dan dikirim ke atlet: {users[selected_athletes[0]]["name"]}')
                 st.rerun()
 
     # Tampilkan program yang ditugaskan untuk atlet
