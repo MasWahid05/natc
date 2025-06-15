@@ -92,6 +92,14 @@ st.markdown("""
         background-color: #d1e9ff;
         box-shadow: 0 1px 2px rgba(0,102,204,0.15);
     }
+    .program-completed {
+        background-color: #e6ffe6 !important;
+        border: 1px solid #4CAF50 !important;
+    }
+    .program-completed .calendar-day-program {
+        background-color: #b3ffb3 !important;
+        color: #1a661a !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -173,18 +181,25 @@ def create_calendar(year, month, programs_data):
                 if date_str in programs_data:
                     progs = programs_data[date_str]
                     with cols[i]:
-                        st.markdown("""
+                        # Cek apakah program sudah selesai dan dievaluasi
+                        has_completed_program = any('evaluation' in p for p in progs)
+                        program_class = 'has-program program-completed' if has_completed_program else 'has-program'
+                        
+                        st.markdown(f"""
                         <style>
-                        [data-testid="column"]:has(div.has-program) {
-                            background-color: #0066cc;
+                        [data-testid="column"]:has(div.{program_class}) {{
+                            background-color: {"#4CAF50" if has_completed_program else "#0066cc"};
                             border-radius: 5px;
                             padding: 5px;
                             margin: 2px;
-                        }
+                        }}
                         </style>
                         """, unsafe_allow_html=True)
-                        st.markdown("<div class='has-program'>", unsafe_allow_html=True)
-                        st.markdown(f"<div class='calendar-day' style='text-align: center; color: #0066cc; font-size: 1.1em; font-weight: bold;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='{program_class}'>", unsafe_allow_html=True)
+                        calendar_color = "#4CAF50" if has_completed_program else "#0066cc"
+                        st.markdown(f"<div class='calendar-day' style='text-align: center; color: {calendar_color}; font-size: 1.1em; font-weight: bold;'>{day_names[i]} {day}</div>", unsafe_allow_html=True)
+                        if has_completed_program:
+                            st.markdown(f"<div style='text-align: center; color: #4CAF50; font-weight: bold;'>✓ Selesai</div>", unsafe_allow_html=True)
                         for idx, prog in enumerate(progs):
                             with st.expander(prog['name']):
                                 users = load_users()
