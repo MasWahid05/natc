@@ -142,7 +142,7 @@ def create_calendar(year, month, programs_data):
     # Buat header kalender
     cols = st.columns(7)
     for i, day in enumerate(day_names):
-        cols[i].markdown(f"<div class='calendar-day'><b>{day}</b></div>", unsafe_allow_html=True)
+        cols[i].markdown(f"<div class='calendar-day'></div>", unsafe_allow_html=True)
     
     # Isi kalender dengan program
     for week in cal:
